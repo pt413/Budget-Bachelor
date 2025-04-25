@@ -19,6 +19,7 @@ import ExpensesPage, {
   expensesAction,
   expensesLoader,
 } from "./pages/ExpensesPage";
+import BudgetRecommendation from './BudgetRecommendation.jsx';
 
 const router = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
         loader: expensesLoader,
         action: expensesAction,
         errorElement: <Error />,
+      },
+      {
+        path: "recommendation",
+        element: <BudgetRecommendation />,
       },
       {
         path: "logout",

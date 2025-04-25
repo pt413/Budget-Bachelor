@@ -99,6 +99,9 @@ const Dashboard = () => {
                 <div className="flex-lg">
                   <AddBudgetForm />
                   <AddExpenseForm budgets={budgets} />
+                  <Link to="/recommendation" className="btn btn--dark">
+                    Get Budget Recommendation
+                  </Link>
                 </div>
                 <h2>Existing Budgets</h2>
                 <div className="budgets">

@@ -1,24 +1,32 @@
-from django.db import models
-
-# Create your models here.
 import numpy as np
-import pandas as pd
-from sklearn.linear_model import LinearRegression
-import pickle
+import joblib
 import os
 
-# here 1
-data = pd.DataFrame({
-    'Month': [1, 2, 3, 4, 5],
-    'Expenses': [500, 600, 700, 800, 900]
-})
+# Load the trained model
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "recommendation_model.pkl")
+model = joblib.load(model_path)
 
-X = data[['Month']]
-y = data['Expenses']
-
-model = LinearRegression()
-model.fit(X, y)
-
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "models.pkl")
-with open(MODEL_PATH, "wb") as f:
-    pickle.dump(model, f)
+def get_prediction(user_input):
+    try:
+        input_array = np.array([[
+            user_input["income"],
+            user_input["age"],
+            user_input["dependents"],
+            user_input["occupation"],
+            user_input["cityTier"],
+            user_input["interest_travel"],
+            user_input["interest_food"],
+            user_input["interest_tech"],
+            user_input["interest_fitness"]
+        ]])
+        prediction = model.predict(input_array)
+        return {
+            "Rent": prediction[0][0],
+            "Groceries": prediction[0][1],
+            "Transport": prediction[0][2],
+            "Eating_Out": prediction[0][3],
+            "Savings": prediction[0][4]
+        }
+    except Exception as e:
+        return {"error": str(e)}

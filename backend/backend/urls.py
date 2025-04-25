@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from model import views
+from backend import view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ml/', include('model.urls')),
     path('', views.homepage),
+    path('recommend/', views.recommend_budget),
 ]
