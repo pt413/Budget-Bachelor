@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './BudgetRecommendation.css'
 
 function BudgetRecommendation() {
     console.log("BudgetRecommendation component is rendered!");
+
+    const mainCategories = ['Rent', 'Groceries', 'Transport', 'Eating_out', 'Savings'];
 
     const [income, setIncome] = useState('');
     const [age, setAge] = useState('');
@@ -37,23 +40,41 @@ function BudgetRecommendation() {
             });
             setRecommendations(response.data);
             console.log('Recommendation response:', response.data);
+            console.log('Recommendation:', recommendation);
         } catch (error) {
             console.error('Error fetching budget recommendation:', error);
         }
     };
+    const mainCategoryData = [];
+    const interestCategoryData = [];
+
+    if (recommendation) {
+        Object.entries(recommendation).forEach(([category, amount]) => {
+            if (mainCategories.includes(category)) {
+                mainCategoryData.push({ name: category, amount });
+            } else {
+                interestCategoryData.push({ name: category, amount });
+            }
+        });
+    }
 
     return (
         <div>
             <h2>Budget Recommendation</h2>
             <br></br>
             <form onSubmit={handleSubmit}>
-                <input type="number" value={income} onChange={(e) => setIncome(e.target.value)} placeholder="Income" required />
+                <input type="number" value={income} onChange={(e) => setIncome(e.target.value)} placeholder="Monthly Income" required />
                 <br></br>
                 <br></br>
                 <input type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Age" required />
                 <br></br>
                 <br></br>
-                <input type="number" value={cityTier} onChange={(e) => setCityTier(e.target.value)} placeholder="City Tier" required />
+                <select value={cityTier} onChange={(e) => setCityTier(e.target.value)} required>
+                    <option value="" disabled>Select City Tier</option>
+                    <option value="Tier 1">Tier 1(Metro)</option>
+                    <option value="Tier 2">Tier 2</option>
+                    <option value="Tier 3">Tier 3</option>
+                </select>
                 <br></br>
                 <br></br>
                 <h3>Interests</h3>
@@ -65,7 +86,7 @@ function BudgetRecommendation() {
                         checked={interestTravel}
                         onChange={(e) => setInterestTravel(e.target.checked ? 1 : 0)}
                     />
-                    </div>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.0rem', marginBottom: '0.5rem' }}>
                     <label htmlFor="food">Food</label>
                     <input
@@ -74,9 +95,9 @@ function BudgetRecommendation() {
                         checked={interestFood}
                         onChange={(e) => setInterestFood(e.target.checked ? 1 : 0)}
                     />
-                    </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.3rem', marginBottom: '0.5rem' }}>
-                    <label htmlFor="tech">Tech</label>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', marginBottom: '0.5rem' }}>
+                    <label htmlFor="tech">Games</label>
                     <input
                         type="checkbox"
                         id="tech"
@@ -97,22 +118,61 @@ function BudgetRecommendation() {
             </form>
 
             {recommendation && (
-                <div>
-                    <br></br>
-                    <h2>Recommendations</h2>
-                    <br></br>
-                    <h5>You can save money in following categories:</h5>
-                    <br></br>
-                    <div>
-                        <ul>
-                            <li>Rent: {Math.round(recommendation.Rent/10)}</li>
-                            <li>Groceries: {Math.round(recommendation.Groceries/10)}</li>
-                            <li>Transport: {Math.round(recommendation.Transport/10)}</li>
-                            <li>Eating Out: {Math.round(recommendation.Eating_Out/10)}</li>
-                            <li>Savings: {Math.round(recommendation.Savings/10)}</li>
-                        </ul>
+            <div className="recommendation-container">
+                <h2>Your Personalized Budget Recommendations</h2>
+                <div className="income-age-info">
+                    <h5>Based on your monthly income, age, and preferences, we recommend the following budget allocation:</h5>
+                </div>
+                <div className="categories-grid">
+                    {/* Main Categories */}
+                    <div className="category-column">
+                        <h3>Main Categories</h3>
+                        {mainCategoryData.map((item, index) => (
+                        <div key={index} className="category-card">
+                            <div className="category-header">
+                                <span>{item.name}</span>
+                                <span>₹{Math.round(item.amount)}</span>
+                            </div>
+                            <div className="progress-bar">
+                                <div
+                                    className="progress-filled"
+                                    style={{ width: `${((item.amount) / income) * 100}%` }}
+                                ></div>
+                            </div>
+                            <div className="category-footer">
+                                <span style={{ marginLeft: 'auto'}}>
+                                    {((item.amount) / income * 100).toFixed(2)}%
+                                </span>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+
+                    {/* Interest Based Categories */}
+                    <div className="category-column">
+                        <h3>Based on Your Interests</h3>
+                        {interestCategoryData.map((item, index) => {
+                        if (item.name === 'Food' && !interestFood) return null;   
+                        return (
+                        <div key={index} className="category-card">
+                            <div className="category-header">
+                                <span>{item.name === 'Tech' ? 'Games' : item.name}</span>
+                                <span>₹{Math.round(item.amount)}</span>
+                            </div>
+                        <div className="progress-bar interest-progress">
+                            <div className="progress-filled" style={{ width: `${((item.amount) / income) * 100}%` }}></div>
+                        </div>
+                        <div className="category-footer">
+                            <span style={{ marginLeft: 'auto'}}>
+                                {((item.amount) / income * 100).toFixed(2)}%
+                            </span>
+                        </div>
+                    </div>
+                        );
+                        })}
                     </div>
                 </div>
+            </div>
             )}
         </div>
     );
